@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 title Clipdesk install
 echo === Clipdesk install ===
-where python >nul 2>&1 || (echo Python 3.10+ not found. Install it from python.org, tick "Add to PATH", then run this again. & pause & exit /b 1)
+where python >nul 2>&1 || (echo Python 3.12 not found. Install it from python.org, tick "Add to PATH", then run this again. & pause & exit /b 1)
 where ffmpeg >nul 2>&1 || (echo ffmpeg not found. Run: winget install ffmpeg   then open a new window and run this again. & pause & exit /b 1)
 where git >nul 2>&1 || echo (git not found, only needed if you want to update with git pull)
 python -m pip install --upgrade pip

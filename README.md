@@ -16,10 +16,12 @@ Default setup is GTA VI streamer clips (titles, tags and captions say "GTA 6"). 
 
 The pipeline is described in `docs/PIPELINE.md`. The clip rules are in `CLIP_RULES.md`, read them first. Every clip must follow them.
 
+New to this? Follow **docs/GETTING_STARTED.md**, a step-by-step guide for beginners.
+
 ## You need
 
 - Windows 10/11 (macOS and Linux are not tested)
-- Python 3.10+, ffmpeg, Node.js
+- Python 3.12, ffmpeg, Node.js, Git
 - A Claude subscription and the Claude CLI signed in (`claude -p` does the scouting, judging, titles and captions). No API key is used.
 - A YouTube channel and a Google Cloud project (free) for the upload API, see `docs/youtube.md`
 - An Instagram Business or Creator account linked to a Facebook Page, see `docs/instagram.md`
