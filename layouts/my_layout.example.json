@@ -1,0 +1,16 @@
+{
+  "name": "my_layout",
+  "desc": "Copy this file, rename it to my_layout.json (drop the .example), and edit. It then appears in the UI.",
+  "needs_face": true,
+  "fallback": "blur",
+  "bg": { "type": "gradient", "colors": ["#0f2027", "#2c5364"], "angle": 0 },
+  "look": "cool",
+  "frame": "white",
+  "caption_y": 300,
+  "layers": [
+    { "src": "game", "fit": "contain", "cx": 0.5, "cy": 0.38, "w": 0.94, "round": 30,
+      "border": { "px": 5, "color": "#ffffff" }, "shadow": { "px": 30, "alpha": 0.5 } },
+    { "src": "face", "shape": "circle", "cx": 0.5, "cy": 0.7, "w": 0.34,
+      "border": { "px": 8, "color": "#ffffff" } }
+  ]
+}

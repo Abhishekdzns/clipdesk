@@ -1,0 +1,34 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Word editor</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0d0d10;color:#eee;font:15px system-ui;display:flex;height:100vh}
+#l{width:360px;padding:14px;display:flex;flex-direction:column;gap:10px;border-right:1px solid #222}
+video{width:100%;border-radius:12px;background:#000;max-height:70vh}
+#r{flex:1;padding:18px;overflow:auto}
+h3{margin:0 0 10px;font-size:13px;color:#999;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+#ws{line-height:2.3}
+.w{display:inline-block;padding:2px 8px;margin:2px;border-radius:8px;background:#1a1a20;cursor:pointer;border:1px solid transparent}
+.w:hover{border-color:#555}.w.now{background:#2b5cff}.w.chg{outline:2px solid #f5b400}
+.w input{background:#000;color:#fff;border:0;font:inherit;width:9ch;outline:2px solid #2b5cff;border-radius:6px;padding:0 4px}
+button{background:#2b5cff;color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer}
+button:disabled{opacity:.5}small{color:#888}
+#find{display:flex;gap:6px}#find input{flex:1;background:#17171c;border:1px solid #333;color:#fff;border-radius:8px;padding:8px}
+</style>
+<div id=l><video id=v controls></video><div id=find><input id=a placeholder="find word"><input id=b placeholder="replace with"><button id=ra>All</button></div>
+<button id=save>Save and re-render</button><small id=st>Click a word. Type the fix. Enter. Spaces make several words. Empty deletes it.</small></div>
+<div id=r><h3>Captions</h3><div id=ws></div></div>
+<script>
+const ID=location.pathname.split('/').pop(),$=s=>document.querySelector(s),v=$('#v');let W=[],orig=[],T={};
+async function load(){const d=await (await fetch('/api/captions/'+ID)).json();if(d.error){$('#ws').textContent=d.error;return}
+ T=d;W=d.words.map(w=>({...w}));orig=W.map(w=>w.word);v.src='/clip/'+ID+'.mp4?'+Date.now();draw()}
+function draw(){const el=$('#ws');el.innerHTML='';W.forEach((w,i)=>{const s=document.createElement('span');s.className='w'+(w.word!=orig[i]&&orig.length==W.length?' chg':'');s.dataset.i=i;s.textContent=w.word;
+ s.onclick=()=>{v.currentTime=w.start;const inp=document.createElement('input');inp.value=w.word;inp.style.width=Math.max(6,w.word.length+2)+'ch';s.textContent='';s.appendChild(inp);inp.focus();inp.select();
+  const done=()=>{const t=inp.value.trim().split(/\s+/).filter(Boolean);if(!t.length){W.splice(i,1)}else if(t.length==1){w.word=t[0]}else{const d=(w.end-w.start)/t.length;W.splice(i,1,...t.map((x,k)=>({word:x,start:+(w.start+k*d).toFixed(2),end:+(w.start+(k+1)*d).toFixed(2)})))}draw()};
+  inp.onkeydown=e=>{if(e.key=='Enter')inp.blur();if(e.key=='Escape'){inp.value=w.word;inp.blur()}};inp.onblur=done};el.appendChild(s)})}
+v.ontimeupdate=()=>{const t=v.currentTime;document.querySelectorAll('.w').forEach((e,i)=>e.classList.toggle('now',W[i]&&t>=W[i].start&&t<W[i].end))};
+$('#ra').onclick=()=>{const a=$('#a').value.trim().toLowerCase(),b=$('#b').value.trim();if(!a)return;let n=0;W.forEach(w=>{if(w.word.replace(/[^\p{L}\p{N}']/gu,'').toLowerCase()==a){w.word=b||w.word;n++}});$('#st').textContent=n+' replaced';draw()};
+$('#save').onclick=async()=>{const b=$('#save');b.disabled=true;$('#st').textContent='Rendering...';
+ const r=await fetch('/api/captions/'+ID,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({words:W,title:T.title})});const j=await r.json().catch(()=>({}));if(j.error){$('#st').textContent=j.error;b.disabled=false;return}
+ const poll=async()=>{const d=await (await fetch('/api/captions/'+ID)).json();if(d.status=='working')return setTimeout(poll,2000);b.disabled=false;$('#st').textContent=d.status=='done'?'Done.':d.status;if(d.status=='done'){orig=d.words.map(w=>w.word);v.src='/clip/'+ID+'.mp4?'+Date.now()}};setTimeout(poll,1500)};
+load();
+</script>

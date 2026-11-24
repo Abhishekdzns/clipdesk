@@ -1,0 +1,12 @@
+numpy
+Pillow
+yt-dlp
+faster-whisper
+ctranslate2
+onnx-asr[cpu,hub]
+rapidocr-onnxruntime
+mediapipe
+chat-downloader
+playwright
+google-api-python-client
+google-auth-oauthlib

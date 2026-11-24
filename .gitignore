@@ -1,0 +1,46 @@
+# secrets and accounts, never commit
+client_secret*.json
+yt_token.json
+yt_channel.txt
+ig_api.json
+ig_profile*/
+ig_shots/
+ig_account.txt
+ig_mbs.txt
+ig_posted.json
+ig_progress.txt
+yt_progress.txt
+creators.json
+creators_removed.json
+# runtime state
+clipdesk_state.json
+clipdesk_log.txt
+claude_usage.jsonl
+claude_error.txt
+claude_wait.json
+*.log
+*_log.txt
+job_*.log
+live_job.json
+sweep_todo.json
+keywords_trending.json.bak
+# media and working data
+runs/
+inbox/
+cache/
+avatars/
+models/
+out/
+tmp/
+*.mp4
+*.mkv
+*.webm
+# python and os
+__pycache__/
+*.pyc
+.venv/
+Thumbs.db
+.DS_Store
+# fonts you supply yourself
+fonts/GTAArtDeco*
+emoji/

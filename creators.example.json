@@ -1,0 +1,12 @@
+{
+ "_note": "Copy to creators.json (the app also edits it from Add streamer). Official channels only. A streamer is only clipped and posted when permission starts with 'approved'.",
+ "creators": [
+  {
+   "name": "Example Streamer",
+   "channel_id": "UCxxxxxxxxxxxxxxxxxxxxxx",
+   "uploader_id": "@ExampleStreamer",
+   "permission": "approved (owner, 01 Jan 2027)",
+   "language": "en"
+  }
+ ]
+}

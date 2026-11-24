@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Downloads · Clipdesk</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+@font-face{font-family:"Inter";src:url(/fonts/Inter-Regular.otf);font-weight:400}
+@font-face{font-family:"Geist Mono";src:url(/fonts/GeistMono-Regular.ttf);font-weight:400}
+:root{--bg:#101314;--surface:#171a1e;--surface-2:#1e2227;--fg:#fffffe;--fg-2:#d9d9d9;--mut:#818283;--line:#262c34;--ok:#5ee08a;--warn:#ffb547;--bad:#ff7a8a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 Inter,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+h1{font-size:24px;font-weight:400;margin:0}a.back{color:var(--mut);text-decoration:none}a.back:hover{color:var(--fg)}
+.live{display:inline-flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:p 1.4s infinite}@keyframes p{50%{opacity:.25}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:28px}
+.c{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.c .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.c .n{font-size:16px}
+.pill{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--mut)}
+.pill.downloading{color:var(--ok)}.pill.paused{color:#9ab8ff}.bar.paused i{animation:none;width:100%;background:#9ab8ff}
+button.pb{margin-top:12px;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);font:inherit;font-size:13px;cursor:pointer}button.pb:hover{border-color:var(--fg-2)}button.pb:disabled{opacity:.5;cursor:default}.pill.stalled{color:var(--warn)}.pill.done{color:var(--fg-2)}
+.f{color:var(--mut);font-size:12.5px;word-break:break-all;margin-bottom:12px}
+.row{display:flex;gap:22px}.row div{display:flex;flex-direction:column}.row span{color:var(--mut);font-size:12px}.row b{font:400 18px "Geist Mono",monospace}
+.bar{height:4px;border-radius:4px;background:var(--surface-2);margin-top:14px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);width:30%;animation:m 1.6s linear infinite}@keyframes m{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
+.bar.done i{animation:none;width:100%;background:var(--fg-2)}.bar.stalled i{animation:none;width:100%;background:var(--warn)}
+h2{font-size:16px;font-weight:400;margin:0 0 12px;color:var(--fg-2)}
+.log{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.log .t{display:flex;justify-content:space-between;color:var(--mut);font-size:12.5px;margin-bottom:8px}
+.log pre{margin:0;font:12.5px/1.6 "Geist Mono",monospace;color:var(--fg-2);white-space:pre-wrap;word-break:break-word}
+.rep{background:var(--surface);border:1px solid var(--fg-2);border-radius:16px;padding:16px;margin-bottom:16px}.rep .t{display:flex;justify-content:space-between;margin-bottom:4px}.rep .s{color:var(--mut);margin-bottom:12px}.rep .r{display:grid;grid-template-columns:150px 1fr 70px;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.rep .r b{font-weight:400}.rep .r .st{color:var(--ok)}.rep .r .d{color:var(--mut);font-size:13px}.rep .r .e{color:var(--bad);font-size:12.5px;font-family:"Geist Mono",monospace;margin-top:4px}.rep .x{background:none;border:0;color:var(--mut);cursor:pointer;font:inherit}
+.empty{color:var(--mut);padding:20px 0}
+</style></head><body><div class="wrap">
+<div class="top"><div><a class="back" href="/">← Clipdesk</a><h1>Downloads</h1></div><div class="live"><span class="dot"></span><span id="upd">live</span></div></div>
+<div class="grid" id="grid"></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Activity</h2><button class="pb" id="rep" style="margin:0;background:var(--fg);color:var(--bg);border-color:var(--fg)">Give live report</button></div>
+<div id="report"></div><div id="logs"></div>
+</div>
+<script>
+const fmtMB=m=>m>=1000?(m/1000).toFixed(2)+" GB":m.toFixed(0)+" MB";
+const ago=s=>s<60?s+"s ago":s<3600?Math.floor(s/60)+"m ago":Math.floor(s/3600)+"h ago";
+async function tick(){
+ try{const r=await fetch("/api/downloads",{cache:"no-store"});const d=await r.json();
+  const it=d.items.sort((a,b)=>(({downloading:0,paused:1,stalled:2,done:3}[a.state])-({downloading:0,paused:1,stalled:2,done:3}[b.state]))||a.streamer.localeCompare(b.streamer));
+  document.getElementById("grid").innerHTML=it.length?it.map(x=>`<div class="c"><div class="h"><span class="n">${x.streamer} <span style="color:var(--mut);font-size:13px">· ${x.kind}</span></span><span class="pill ${x.state}">${x.state}</span></div>
+  <div class="f">${x.file}</div><div class="row"><div><span>Size</span><b>${fmtMB(x.mb)}</b></div><div><span>Speed</span><b>${x.state==="downloading"?x.speed.toFixed(2)+" MB/s":"-"}</b></div><div><span>Last write</span><b>${ago(x.age)}</b></div></div>
+  <div class="bar ${x.state}"><i></i></div>${x.state==="done"?"":`<button class="pb" data-run="${x.run}" data-act="${x.state==="paused"?"resume":"pause"}">${x.state==="paused"?"Resume":"Pause"}</button>`}</div>`).join(""):'<div class="empty">No downloads in the last 6 hours.</div>';
+  document.getElementById("logs").innerHTML=d.logs.map(l=>`<div class="log"><div class="t"><span>${l.name}</span><span>${ago(d.now-l.mtime)}</span></div><pre>${l.lines.map(s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;")).join("\n")}</pre></div>`).join("");
+  document.getElementById("upd").textContent="updated "+new Date().toLocaleTimeString();
+ }catch(e){document.getElementById("upd").textContent="Clipdesk not reachable";}
+}
+document.addEventListener("click",async e=>{const b=e.target.closest("button.pb");if(!b)return;b.disabled=true;b.textContent=b.dataset.act==="pause"?"Pausing...":"Resuming...";
+ try{const r=await fetch("/api/downloads/"+b.dataset.act,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({run:b.dataset.run})});const d=await r.json();if(d.error)alert(d.error);}catch(_){}
+ tick();});
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+async function report(){const b=document.getElementById("rep");b.disabled=true;b.textContent="Checking...";
+ try{const d=await (await fetch("/api/report",{cache:"no-store"})).json();
+  document.getElementById("report").innerHTML=`<div class="rep"><div class="t"><b>${esc(d.title)}</b><button class="x" onclick="document.getElementById('report').innerHTML=''">Close</button></div><div class="s">${esc(d.summary)}</div>`+
+  d.rows.map(r=>`<div class="r"><b>${esc(r.streamer)}</b><div><div class="st" style="${r.stage.startsWith("Stopped")?"color:var(--warn)":""}">${esc(r.stage)}</div><div class="d">${esc(r.detail)}</div>${r.error?`<div class="e">Last error: ${esc(r.error)}</div>`:""}</div><div class="d">${r.clips} clip(s)</div></div>`).join("")+`</div>`;
+ }catch(e){document.getElementById("report").innerHTML='<div class="rep">Could not build the report.</div>';}
+ b.disabled=false;b.textContent="Give live report";}
+document.getElementById("rep").onclick=report;
+tick();setInterval(tick,3000);
+</script></body></html>
